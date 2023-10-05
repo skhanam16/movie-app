@@ -1,7 +1,17 @@
 // console.log(window.location.pathname);
 // HIghlight links
 let global = {
-    currentPage: window.location.pathname
+    currentPage: window.location.pathname,
+    search: {
+        term: '',
+        type: '',
+        page: 1,
+        totalPage: 1
+    },
+    api: {
+        apiKey: '37deb54b5edb51960465d52d1258a557',
+        apiUrl: 'https://api.themoviedb.org/3/'
+    }
 }
 
 
@@ -185,7 +195,7 @@ popularMovies.appendChild(div);
 }
 
 // console.log("this is "  +  global.currentPage);
-// Display movie slider - 8
+
 // Display movie slider - 8
 async function displaySlider(){
     const {results} = await fetchAPIData('movie/now_playing');
@@ -231,12 +241,40 @@ function  initSlider(){
         });
     }
 
-// Fetch data from TMDB API -3
+// Fetch data form url - 9
+
+async function search(){
+    const queryString = window.location.search;
+    // console.log(queryString); perfect outcome
+    const urlParams = new URLSearchParams(queryString);
+    // console.log(urlParams.get('type')); - works perfect
+    global.search.type = urlParams.get('type');
+    console.log(global.search.type);
+    global.search.term = urlParams.get('search-term');
+    console.log(global.search.term);
+    if(global.search.type !== '' && global.search.type !== null){
+    //    @todo - make request and display results
+    const {results} = await searchAPIData();
+    if(results.length === 0){
+        showAlert("No results found");
+        return;
+    }
+    // displaySearchResults();
+    displaySearchResults(results);
+    document.querySelector('#search-term').value = '';
+
+    }
+    else{
+        showAlert("Please enter search term", 'error');
+    }
+}
 
 // Fetch data from TMDB API -3
 async function fetchAPIData(endpoint){
-    const API_KEY = '37deb54b5edb51960465d52d1258a557';
-    const API_URL = 'https://api.themoviedb.org/3/';
+    // const API_KEY = '37deb54b5edb51960465d52d1258a557';
+    // const API_URL = 'https://api.themoviedb.org/3/';
+    const API_KEY = global.api.apiKey;
+    const API_URL = global.api.apiUrl;
     showSpinner();
     const res = await fetch(`${API_URL}${endpoint}?api_key=${API_KEY}&language=en-US`);
     const data = await res.json();
@@ -245,6 +283,22 @@ async function fetchAPIData(endpoint){
     // console.log(data);
 }
 
+// Fetch data from TMDB API -11
+async function searchAPIData(){
+    // const API_KEY = '37deb54b5edb51960465d52d1258a557';
+    // const API_URL = 'https://api.themoviedb.org/3/';
+    const API_KEY = global.api.apiKey;
+    const API_URL = global.api.apiUrl;
+    showSpinner();
+    // const res = await fetch(`${API_URL}search?${global.search.type}?api_key=${API_KEY}&language=en-US&query=${global.search.term}`);
+    const res = await fetch(
+        `${API_URL}search/${global.search.type}?api_key=${API_KEY}&language=en-US&query=${global.search.term}&page=${global.search.page}`
+      );
+    const data = await res.json();
+    hideSpinner();
+    return data;
+    // console.log(data);
+}
 // hightlighted Active link - 2
 function highlightedActiveLink(){
     const links = document.querySelectorAll('.nav-link');
@@ -256,6 +310,17 @@ function highlightedActiveLink(){
    
 }
 
+// Show alert message - 10
+
+function showAlert(message, className = "error"){
+    const alertEL = document.createElement('div');
+    alertEL.classList.add('alert', className);
+    alertEL.appendChild(document.createTextNode(message));
+    document.getElementById('alert').appendChild(alertEL);
+    setTimeout(() =>{
+alertEL.remove()
+    }, 3000);
+}
 
 // init app -1 
 function init(){
@@ -274,7 +339,7 @@ function init(){
             displayMovieDetails();
             break;
         case '/search.html':
-            console.log('Search');
+            search();
             break;
         case '/tv-details.html':
             displayShowDetails();
