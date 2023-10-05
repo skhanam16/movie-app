@@ -4,8 +4,65 @@ let global = {
     currentPage: window.location.pathname
 }
 
+
+
+// Display Show details - 7
+async function displayShowDetails(){
+    const showID = window.location.search.split('=')[1];
+    console.log("this is id" + showID);
+    const show = await fetchAPIData(`tv/${showID}`);
+    console.log(show);
+    const div = document.createElement('div');
+    div.innerHTML =`
+    <div class="details-top">
+    <div>
+    ${show.poster_path ? `<img
+src="https://image.tmdb.org/t/p/w500${show.poster_path}"
+class="card-img-top"
+alt="${show.name}"
+/>` : ` <img
+src="images/no-image.jpg"
+class="card-img-top"
+alt="${show.name}"
+/>`}
+    </div>
+    <div>
+      <h2>${show.name}</h2>
+      <p>
+        <i class="fas fa-star text-primary"></i>
+        8 / 10
+      </p>
+      <p class="text-muted">Last air Date: ${show.last_air_date}</p>
+      <p>${show.overview}</p>
+      <h5>Genres</h5>
+      <ul class="list-group">
+      ${show.genres.map((genre) =>
+        `<li>${genre.name}</li>`).join('')
+      }
+      </ul>
+      <a href="${show.homepage}" target="_blank" class="btn">Visit Movie Homepage</a>
+    </div>
+  </div>
+  <div class="details-bottom">
+    <h2>Show Info</h2>
+    <ul>
+      <li><span class="text-secondary">Number of Episodes</span> $${show.number_of_episodes}</li>
+      <li><span class="text-secondary">Last Episode to Air:</span> ${show.last_episode_to_air.name}</li>
+  
+      <li><span class="text-secondary">Status:</span> Released</li>
+    </ul>
+    <h4>Production Companies</h4>
+    <div class="list-group">Company 1, Company 2, Company 3</div>
+  </div>
+    `;
+    document.querySelector('#show-details').appendChild(div);
+}
+
+
+
 // Display Movie details - 6
 async function displayMovieDetails(){
+    // window. location.search returns the query string from the current URL of the web page.
     const movieID = window.location.search.split('=')[1];
     console.log(movieID);
     const movie = await fetchAPIData(`movie/${movieID}`);
@@ -100,7 +157,8 @@ popularMovies.appendChild(div);
 // Display popular movies  - 4
 async function displayPopularMovies(){
     const {results} = await fetchAPIData('movie/popular');
-    // console.log(results);
+    // within the object there is results array
+    // console.log("test the results" + results);
     results.forEach((movie) =>{
 const div = document.createElement('div');
 div.classList.add('card');
@@ -127,6 +185,53 @@ popularMovies.appendChild(div);
 }
 
 // console.log("this is "  +  global.currentPage);
+// Display movie slider - 8
+// Display movie slider - 8
+async function displaySlider(){
+    const {results} = await fetchAPIData('movie/now_playing');
+    // console.log(results);
+    results.forEach((movie) =>
+    {
+        const div = document.createElement('div');
+        div.classList.add('swiper-slide');
+        div.innerHTML = `
+        <a href="movie-details.html?id=${movie.id}">
+          <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}" />
+        </a>
+        <h4 class="swiper-rating">
+          <i class="fas fa-star text-secondary"></i>  ${movie.vote_average} / 10
+        </h4>
+        `;
+        document.querySelector('.swiper-wrapper').appendChild(div);
+        initSlider();
+    });
+   
+}
+
+// Initialise swiper object - 9
+
+function  initSlider(){
+    const swiper = new Swiper('.swiper', {
+        slidesPerView: 1,
+        spaceBetween: 30,
+        freeMode: true,
+        loop: true,
+        autoplay: {
+            delay: 4000,
+            disableOnInteraction: false},
+        breakpoints:{
+            500: {
+                slidesPerView: 2},
+            700: {
+                slidesPerView: 3},
+            1200: {
+                slidesPerView: 4},
+
+            }
+        });
+    }
+
+// Fetch data from TMDB API -3
 
 // Fetch data from TMDB API -3
 async function fetchAPIData(endpoint){
@@ -151,6 +256,7 @@ function highlightedActiveLink(){
    
 }
 
+
 // init app -1 
 function init(){
    
@@ -158,6 +264,7 @@ function init(){
         case '/':
         case '/index.html':
         //    console.log('Home');
+           displaySlider();
            displayPopularMovies();
            break;
         case '/shows.html':
@@ -170,7 +277,7 @@ function init(){
             console.log('Search');
             break;
         case '/tv-details.html':
-            console.log('TV details');
+            displayShowDetails();
             break;
         default:
             console.log("unknown page");
