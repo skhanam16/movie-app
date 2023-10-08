@@ -6,7 +6,8 @@ let global = {
         term: '',
         type: '',
         page: 1,
-        totalPage: 1
+        totalPages: 1,
+        totalResults: 0
     },
     api: {
         apiKey: '37deb54b5edb51960465d52d1258a557',
@@ -19,9 +20,9 @@ let global = {
 // Display Show details - 7
 async function displayShowDetails(){
     const showID = window.location.search.split('=')[1];
-    console.log("this is id" + showID);
+    // console.log("this is id" + showID);
     const show = await fetchAPIData(`tv/${showID}`);
-    console.log(show);
+    // console.log(show);
     const div = document.createElement('div');
     div.innerHTML =`
     <div class="details-top">
@@ -191,10 +192,8 @@ const popularMovies = document.getElementById('popular-movies');
 popularMovies.appendChild(div);
     });
 
-  
 }
 
-// console.log("this is "  +  global.currentPage);
 
 // Display movie slider - 8
 async function displaySlider(){
@@ -241,7 +240,7 @@ function  initSlider(){
         });
     }
 
-// Fetch data form url - 9
+// Fetch data form url - 10
 
 async function search(){
     const queryString = window.location.search;
@@ -252,9 +251,14 @@ async function search(){
     console.log(global.search.type);
     global.search.term = urlParams.get('search-term');
     console.log(global.search.term);
-    if(global.search.type !== '' && global.search.type !== null){
+    if(global.search.term !== '' && global.search.term !== null){
     //    @todo - make request and display results
-    const {results} = await searchAPIData();
+    const {results, total_pages, page, total_results} = await searchAPIData();  
+    console.log(results);
+    global.search.page = page;
+    global.search.totalPages = total_pages;
+    global.search.totalResults= total_results;
+  
     if(results.length === 0){
         showAlert("No results found");
         return;
@@ -265,10 +269,42 @@ async function search(){
 
     }
     else{
-        showAlert("Please enter search term", 'error');
+        showAlert("Please enter search term");
     }
 }
+// display the search results - 12
 
+function displaySearchResults(results){
+    // console.log("Search results" + results);
+    // this results.length will give us the current result
+    document.querySelector('#search-results-heading').innerHTML = `
+    <h2>${results.length} of ${global.search.totalResults} Results for ${global.search.term}</h2>`
+    results.forEach((result) =>{
+        const div = document.createElement('div');
+        div.classList.add('card');
+        div.innerHTML = `<a href="${global.search.type}-details.html?id=${result.id}">${result.poster_path ? `<img
+        src="https://image.tmdb.org/t/p/w500/${result.poster_path}"
+        class="card-img-top"
+        alt="${global.search.type === 'movie' ? result.title : result.name}"
+        />` : ` <img
+        src="images/no-image.jpg"
+        class="card-img-top"
+        alt="${global.search.type === 'movie' ? result.title : result.name}"
+        />`}</a>
+        <div class="card-body">
+        <h5 class="card-title">${global.search.type === 'movie' ? result.title : result.name}</h5>
+        <p class="card-text">
+          <small class="text-muted">Release: ${global.search.type === 'movie' ? result.release_date : result.last_air_date}</small>
+        </p>
+        </div>`;
+        // document.querySelector('#search-results-heading').innerHTML = `
+        // <h2>${results.lemgth} of ${global.search.totalResults}</h2>`
+        const searchResults = document.getElementById('search-results');
+        searchResults.appendChild(div);
+        
+            });
+         
+}
 // Fetch data from TMDB API -3
 async function fetchAPIData(endpoint){
     // const API_KEY = '37deb54b5edb51960465d52d1258a557';
@@ -350,8 +386,6 @@ function init(){
     }
     highlightedActiveLink();
     
-
-  
 }
 
 document.addEventListener('DOMContentLoaded', init);

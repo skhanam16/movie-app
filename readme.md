@@ -12,3 +12,5 @@ git branch -M main
 git push -u origin main
 
 URLSearchParams - URLSearchParams is a built-in JavaScript object that allows you to work with the query string of a URL. It provides methods for appending, deleting, getting, and setting key-value pairs in the query string. You can use it to easily modify and manipulate the URL in your web applications.
+
+window. location.search returns the query string from the current URL of the web page. The query string contains data to be passed to a web server for further processing of a requested resource.
