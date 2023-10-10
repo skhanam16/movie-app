@@ -14,3 +14,5 @@ git push -u origin main
 URLSearchParams - URLSearchParams is a built-in JavaScript object that allows you to work with the query string of a URL. It provides methods for appending, deleting, getting, and setting key-value pairs in the query string. You can use it to easily modify and manipulate the URL in your web applications.
 
 window. location.search returns the query string from the current URL of the web page. The query string contains data to be passed to a web server for further processing of a requested resource.
+
+elapsedTime: Description. The elapsedTime property returns the number of seconds a transition has been running, when a transitionend event occurs. Note: The return value is not affected if the transition is paused (by using the transition-delay CSS property). This property is read-only.
